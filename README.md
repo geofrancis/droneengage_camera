@@ -1,8 +1,12 @@
 # DroneEngage Camera Module
 
 This module uses native webrtc to stream videos from multiple camera to [WebClient](https://github.com/DroneEngage/droneengage_webclient "Weblient").
+https://youtu.be/hf5onZ2-7V4
+
+[![de_camera](https://github.com/DroneEngage/droneengage_camera/blob/master/res/youtube_video_streaming.png?raw=true)](https://www.youtube.com/watch?v=hf5onZ2-7V4)
 
 # Compile The Code
+
 
 ## for X86
 
@@ -33,3 +37,13 @@ then you can use it in RPI or JetsonNano
 ## To Install Scripts for Camera
 
 Please check [Script Section](https://github.com/DroneEngage/droneengage_camera/blob/master/scripts/README.md "Script Section")
+
+
+
+sudo apt-get install nlohmann-json3-dev
+sudo apt-get install libjsoncpp-dev # Install the development package
+sudo apt-get install libjpeg-dev  # Install the development package
+sudo apt-get install libx11-dev libexpat1-dev 
+
+sudo apt-get install clang 
+sudo apt-get install libc++-dev
