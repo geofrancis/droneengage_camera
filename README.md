@@ -1,7 +1,7 @@
 # DroneEngage Camera Module
 
 This module uses native webrtc to stream videos from multiple camera to [WebClient](https://github.com/DroneEngage/droneengage_webclient "Weblient").
-https://youtu.be/hf5onZ2-7V4
+
 
 [![de_camera](https://github.com/DroneEngage/droneengage_camera/blob/master/res/youtube_video_streaming.png?raw=true)](https://www.youtube.com/watch?v=hf5onZ2-7V4)
 
