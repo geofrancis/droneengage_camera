@@ -9,3 +9,7 @@ webrtc_examples
 ./*.jpg
 ./*.png
 *.a
+*.y4m
+*.y4m.hlp
+*.png
+
