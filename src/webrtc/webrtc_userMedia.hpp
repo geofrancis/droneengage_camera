@@ -22,12 +22,19 @@ class CUserMedia  : public rtc::RefCountInterface
         rtc::scoped_refptr<webrtc::VideoTrackInterface> CreateVideoTrackInterface (
             const std::string& trackLabel, 
             webrtc::VideoTrackSourceInterface* videoTrackSourceInterface);
-        bool AddVideoTrack (webrtc::VideoTrackInterface * videoTrackInterface);
         bool RemoveVideoTracks ();
         bool RemoveAudioTracks ();
-        rtc::scoped_refptr<webrtc::MediaStreamInterface> GetMediaStream ();
         
-        static rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> GetPeerConnectionFactory ();
+        rtc::scoped_refptr<webrtc::MediaStreamInterface> GetMediaStream ()
+        {
+            return m_stream;
+        }
+
+        
+        static rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> GetPeerConnectionFactory ()
+        {
+            return m_peerConnectionFactory;
+        }
     protected:
         int m_peerCount;
         rtc::scoped_refptr<webrtc::MediaStreamInterface> m_stream;

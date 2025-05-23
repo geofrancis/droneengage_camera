@@ -6,9 +6,6 @@
 using Json_de = nlohmann::json;
 
 
-static const rtc::SocketAddress kDefaultLocalAddress("192.168.1.139", 1);
-
-
 de::stream_webrtc::CPeerConnectionManager::CPeerConnectionManager ():m_callbacks(NULL)
 {
 }
@@ -62,30 +59,13 @@ bool de::stream_webrtc::CPeerConnectionManager::CreatePeerConnection(const std::
     /////
     m_config.sdp_semantics = webrtc::SdpSemantics::kUnifiedPlan;  // using planB makes offer Bundle writes video.
     
-    // stranges:
-    // m_config.bundle_policy = webrtc::PeerConnectionInterface::BundlePolicy::kBundlePolicyMaxCompat;
-    //m_config.disable_ipv6 = true;
-    //m_config.disable_ipv6_on_wifi = false;
-    
-    // BAD CHOICE m_config.use_media_transport_for_data_channels = true;
-    // BAD CHOICE m_config.use_datagram_transport = true;
-    //m_config.prune_turn_ports = true;
     
     
     de::CNetworkManager * fnm = new de::CNetworkManager();
-    //fnm->AddInterface (kDefaultLocalAddress,"wifi",rtc::AdapterType::ADAPTER_TYPE_WIFI);   // << IP ADDED TO HOST BUT TCP NOT UDP !!!
     
     //rtc::BasicNetworkManager * bnm = new rtc::BasicNetworkManager();
     cricket::BasicPortAllocator* bpa = new cricket::BasicPortAllocator(fnm);
     std::unique_ptr<cricket::PortAllocator> port_allocator(bpa);
-    // port_allocator->set_flags(cricket::PORTALLOCATOR_DISABLE_TCP |
-    //                           cricket::PORTALLOCATOR_DISABLE_RELAY);
-
-    
-    // const cricket::FakePortAllocatorSession* session =
-    //   static_cast<const cricket::FakePortAllocatorSession*>(
-    //       port_allocator.get()->GetPooledSession());
-    
 
     RTC_LOG(INFO) << __FUNCTION__ << "CreatePeerConnection peerid:" << peerID;
     m_peerConnection = de::stream_webrtc::CUserMedia::GetPeerConnectionFactory().get()->CreatePeerConnection(
@@ -231,19 +211,6 @@ void de::stream_webrtc::CPeerConnectionManager::OnSuccess(webrtc::SessionDescrip
   
     std::cout <<__FILE__ << "." << __FUNCTION__ << " line:" << __LINE__ << "  " << _LOG_CONSOLE_BOLD_TEXT << " DEBUG: CPeerConnectionManager::OnSuccess" << _NORMAL_CONSOLE_TEXT_ << std::endl;
     webrtc::SdpParseError error;
-    // webrtc::SessionDescriptionInterface *session_description = 
-    //             webrtc::CreateSessionDescription(desc->type(), sdp, &error);
-    
-
-    //std::unique_ptr<webrtc::IceCandidateInterface> candidate(cricket::Candidate());
-    cricket::Candidate candidate;
-    candidate.set_component(cricket::ICE_CANDIDATE_COMPONENT_DEFAULT);
-    candidate.set_protocol(cricket::UDP_PROTOCOL_NAME);
-    candidate.set_address(kDefaultLocalAddress);
-    candidate.set_type(cricket::LOCAL_PORT_TYPE);
-    
-
-
     
     m_peerConnection.get()->SetLocalDescription(
                 CSetSessionDescriptionObserver::Create(this), desc);
@@ -410,7 +377,6 @@ void de::stream_webrtc::CPeerConnectionManager::OnIceConnectionChange(webrtc::Pe
             {
                 m_callbacks->OnIceConnectionDisconnected(m_sessionID);
             }
-//            this->Close();
             break;
         case webrtc::PeerConnectionInterface::IceConnectionState::kIceConnectionClosed:
             std::cout << "kIceConnectionClosed";

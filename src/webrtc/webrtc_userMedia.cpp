@@ -10,7 +10,6 @@ rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> de::stream_webrtc::CU
 std::unique_ptr<rtc::Thread> de::stream_webrtc::CUserMedia::g_worker_thread = nullptr;
 std::unique_ptr<rtc::Thread> de::stream_webrtc::CUserMedia::g_signaling_thread = nullptr;
 std::unique_ptr<rtc::Thread> de::stream_webrtc::CUserMedia::g_networking_thread = nullptr;
-rtc::Thread* de::stream_webrtc::CUserMedia::thread = nullptr;
 
 de::stream_webrtc::CUserMedia::CUserMedia() 
 {
@@ -42,44 +41,33 @@ bool de::stream_webrtc::CUserMedia::InitializePeerConnection() {
     //https://groups.google.com/forum/#!topic/discuss-webrtc/oWYy9JwK56M
     // without creating threads and starting the signal thread messaging will not work
     // and OnSuccess is not called when creating an offer.
-    //rtc::Thread::Current()->Start();
     de::stream_webrtc::CUserMedia::g_worker_thread = rtc::Thread::Create();
+    de::stream_webrtc::CUserMedia::g_worker_thread->SetName("webrtc_worker", nullptr);
     de::stream_webrtc::CUserMedia::g_worker_thread->Start();
     de::stream_webrtc::CUserMedia::g_signaling_thread = rtc::Thread::Create();
+    de::stream_webrtc::CUserMedia::g_signaling_thread->SetName("webrtc_signaling", nullptr);
     de::stream_webrtc::CUserMedia::g_signaling_thread->Start();
     de::stream_webrtc::CUserMedia::g_networking_thread = rtc::Thread::CreateWithSocketServer();
+    de::stream_webrtc::CUserMedia::g_networking_thread->SetName("webrtc_networking", nullptr);
     de::stream_webrtc::CUserMedia::g_networking_thread->Start();
 
-    //rtc::ThreadManager::Instance()->WrapCurrentThread();
-
-
-    
-
-    de::stream_webrtc::CUserMedia::thread = rtc::ThreadManager::Instance()->WrapCurrentThread();
-  
 
   std::unique_ptr< webrtc::VideoEncoderFactory> factory = std::make_unique<de::stream_webrtc::CBuiltinVideoEncoderFactory>();  //webrtc::CreateBuiltinVideoEncoderFactory();
-  //std::unique_ptr< webrtc::VideoEncoderFactory> factory = webrtc::CreateBuiltinVideoEncoderFactory();  
-
-  // Printed in std::cout so no need to list it.
-  std::vector<webrtc::SdpVideoFormat> format = factory->GetSupportedFormats();
 
   
-  de::stream_webrtc::CUserMedia::m_peerConnectionFactory = rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> (
+  de::stream_webrtc::CUserMedia::m_peerConnectionFactory = 
             webrtc::CreatePeerConnectionFactory(
                 de::stream_webrtc::CUserMedia::g_networking_thread.get(), 
                 de::stream_webrtc::CUserMedia::g_worker_thread.get(),
                 de::stream_webrtc::CUserMedia::g_signaling_thread.get(),
 
                 rtc::scoped_refptr<webrtc::AudioDeviceModule>(CFakeAudioCaptureModule::Create()),
-                // nullptr /* network_thread */, nullptr /* worker_thread */,
-                // nullptr /* signaling_thread */, nullptr /* default_adm */,
                 webrtc::CreateBuiltinAudioEncoderFactory(),
                 webrtc::CreateBuiltinAudioDecoderFactory(),
                 std::move (factory),
                 webrtc::CreateBuiltinVideoDecoderFactory(), 
                 nullptr /* audio_mixer */,
-                nullptr /* audio_processing */).get());
+                nullptr /* audio_processing */);
   } 
 
   if (!de::stream_webrtc::CUserMedia::m_peerConnectionFactory.get())
@@ -100,8 +88,8 @@ bool de::stream_webrtc::CUserMedia::CreateLocalMediaStream(const char * streamId
   {
     return false;
   }
+  m_stream  = m_peerConnectionFactory->CreateLocalMediaStream(streamId);
 
-  m_stream = rtc::scoped_refptr<webrtc::MediaStreamInterface> (m_peerConnectionFactory.get()->CreateLocalMediaStream(streamId).get());
   std::cout << _SUCCESS_CONSOLE_TEXT_ << "stream created :" << streamId << _NORMAL_CONSOLE_TEXT_ << std::endl;
 
   return true;
@@ -155,33 +143,6 @@ rtc::scoped_refptr<webrtc::VideoTrackInterface> de::stream_webrtc::CUserMedia::C
   return videoTrackInterface;
 }
 
-bool de::stream_webrtc::CUserMedia::AddVideoTrack (webrtc::VideoTrackInterface * videoTrackInterface)
-{
-        
-  std::cout << __FULL_DEBUG__   <<  "\033[0;32m" << "AddVideoTrack "  << _NORMAL_CONSOLE_TEXT_ << std::endl;
-  
-  videoTrackInterface->set_enabled(true);
-
-  if (!m_stream.get()->AddTrack(videoTrackInterface))
-  {
-
-    std::cout << __FULL_DEBUG__  << _ERROR_CONSOLE_BOLD_TEXT_ << "could NOT AddTrack"  << _NORMAL_CONSOLE_TEXT_ << std::endl;
-    return false;
-  }
-
-  return true;  
-
-}
-
-rtc::scoped_refptr<webrtc::MediaStreamInterface> de::stream_webrtc::CUserMedia::GetMediaStream ()
-{
-  return m_stream;
-}
-
-rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> de::stream_webrtc::CUserMedia::GetPeerConnectionFactory ()
-{
-  return m_peerConnectionFactory;
-}
 
 
 

@@ -25,12 +25,24 @@ bool de::stream_webrtc::VideoDevCapturerComposite::Init(size_t width,
   m_Capturer->RegisterCaptureDataCallback(this);
 
   // start capturing with given parameters.
-  video_info->GetCapability(m_Capturer->CurrentDeviceName(), 0, m_cabability);
+  webrtc::VideoCaptureCapability cabability;
 
-  m_cabability.width = static_cast<int32_t>(width);
-  m_cabability.height = static_cast<int32_t>(height);
-  m_cabability.maxFPS = static_cast<int32_t>(target_fps);
-  m_cabability.videoType = webrtc::VideoType::kI420; //TODO: check this !!!!!!
+  cabability.width = static_cast<int32_t>(width);
+  cabability.height = static_cast<int32_t>(height);
+  cabability.maxFPS = static_cast<int32_t>(target_fps);
+  cabability.videoType = webrtc::VideoType::kI420; //TODO: check this !!!!!!
+
+  video_info->GetBestMatchedCapability(m_Capturer->CurrentDeviceName(), cabability, m_cabability);
+
+  std::cout << _SUCCESS_CONSOLE_BOLD_TEXT_ << "Valid Video Device Found: "  
+        << _SUCCESS_CONSOLE_TEXT_ << " cam_unique_name:" << _INFO_BOLD_CONSOLE_TEXT << unique_name 
+        << _SUCCESS_CONSOLE_TEXT_ << " width:" << _INFO_BOLD_CONSOLE_TEXT << m_cabability.width 
+        << _SUCCESS_CONSOLE_TEXT_ << " height:" << _INFO_BOLD_CONSOLE_TEXT << m_cabability.height 
+        << _SUCCESS_CONSOLE_TEXT_ << " maxFPS:" << _INFO_BOLD_CONSOLE_TEXT << m_cabability.maxFPS 
+        << _NORMAL_CONSOLE_TEXT_ << std::endl;
+        
+  
+
 
   
   return true;
@@ -122,21 +134,11 @@ void de::stream_webrtc::VideoDevCapturerComposite::OnFrame(const webrtc::VideoFr
     // save video if needed
     printVideoFrame (frame);
   }
-  //try
- // {
-    /* code */
-    // save image if needed
-    saveFrameAsPNG(frame);  
-    saveFrameAsRGB(frame);
-  // }
-  // catch(const std::exception& e)
-  // {
-  //   std::cerr << e.what() << '\n';
-  // }
-  // catch(...)
-  // {
-
-  // }
+  
+  // save image if needed
+  saveFrameAsPNG(frame);  
+  saveFrameAsRGB(frame);
+  
   
   if (!m_once)
   {
@@ -230,12 +232,7 @@ void de::stream_webrtc::VideoDevCapturerComposite::RemoveSink(rtc::VideoSinkInte
 }
 
 void de::stream_webrtc::VideoDevCapturerComposite::UpdateVideoAdapter() {
-  // rtc::VideoSinkWants wants = m_broadCaster.wants();
-  
-  // m_videoAdapter.OnResolutionFramerateRequest(
-  //                   wants.target_pixel_count, 
-  //                   wants.max_pixel_count, 
-  //                   wants.max_framerate_fps);
+
 }
 
 webrtc::VideoFrame de::stream_webrtc::VideoDevCapturerComposite::MaybePreprocess(const webrtc::VideoFrame& frame) {
